@@ -1,0 +1,25 @@
+#Digilent WaveForms Oscilloscope Measurements
+#Device Name: ADP3450
+#Serial Number: SN:210018B48834
+#Date Time: 2025-12-04 15:29:07.357
+#Sample rate: 1e+08Hz
+#Samples: 32768
+#Trigger: Source: Channel 3 Type: Edge Condition: Rising Level: 790 uV Hyst.: Auto HoldOff: 100 ns
+#Channel 1: Range: 10 V/div Offset: 0 V Attenuation: 10 X Coupling: DC Bandwidth: Full Sample Mode: Average
+#Channel 2: Range: 200 mV/div Offset: 0 V Attenuation: 1 X Coupling: DC Bandwidth: Full Sample Mode: Average
+#Channel 3: Range: 500 mV/div Offset: 0 V Attenuation: 1 X Coupling: DC Bandwidth: Full Sample Mode: Average
+#Channel 4: Range: 2 V/div Offset: 0 V Attenuation: 10 X Coupling: DC Bandwidth: Full Sample Mode: Average
+
+,Name,Value
+C1,Power Supply, 9.5459 V
+C1,Power Supply Max, 11.223 V
+C1,Power Supply Min, 8.7178 V
+C2,Current Probe Amp, 9.4257 A
+C2,Frequency, 118.63 kHz
+C3,TX Amplitude, 559.27 V
+C3,Frequency, 118.69 kHz
+C4,RX Average, 2.2114 V
+C4,RX DC RMS, 2.8264 Ṽ
+C4,RX Max, 9.4922 V
+C4,RX Min,-0.64020 V
+C4,Frequency, 237.26 kHz

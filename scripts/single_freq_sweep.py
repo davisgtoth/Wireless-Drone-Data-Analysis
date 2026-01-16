@@ -71,9 +71,9 @@ with dwf.Device() as device:
         results = get_measurements(ch1, ch2, ch3, ch4, SAMPLE_RATE)
 
         data = {
-            'Driving Frequency (Hz)': freq
+            'Driving Frequency (Hz)': freq,
+            **results
         }
-        data.update(results)
         append_data(output_file, data)
 
         tx_rms = results['TX Voltage RMS (V)']

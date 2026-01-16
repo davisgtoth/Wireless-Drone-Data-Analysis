@@ -7,14 +7,21 @@ from util.measurements import get_measurements
 from util.append_data import append_data
 
 parser = argparse.ArgumentParser(description="Perform a frequency sweep and log measurements.")
-parser.add_argument('-c', '--coord', type=str, required=True, help='Coordinate varied in the measurement.')
+parser.add_argument('-c', '--sweep', type=str, required=True, choices=['r', 'theta', 'z'], 
+                    help='Coordinate varied in the measurement (r, theta, or z).')
+parser.add_argument('-r', type=float, default=0.0, help='Fixed r value (mm)')
+parser.add_argument('-t', '--theta', type=float, default=0.0, help='Fixed theta value (deg)')
+parser.add_argument('-z', type=float, default=0.0, help='Fixed z value (mm)')
 parser.add_argument('-s', '--start', type=float, required=True, help='Start frequency in kHz.')
 parser.add_argument('-e', '--stop', type=float, required=True, help='End frequency in kHz.')
 parser.add_argument('-d', '--step', type=int, required=False, help='Step size in kHz.')
 parser.add_argument('-o', '--output', type=str, required=True, help='Output CSV file to append results.')
 
 args = parser.parse_args()
-coordinate = args.coord
+coordinate = args.sweep
+r_val = args.r
+theta_val = args.theta
+z_val = args.z
 start_freq = args.start * 1e3
 end_freq = args.stop * 1e3
 step_size = args.step * 1e3 if args.step else 0.1e3 # default 0.1 kHz step
@@ -31,8 +38,15 @@ BUFFER_SIZE = 1000
 freq_list = np.arange(start_freq, end_freq + step_size, step_size)
 num_steps = len(freq_list) 
 
+current_coords = {
+    'r': r_val,
+    'theta': theta_val,
+    'z': z_val
+}
+
 print("="*40)
-print(f" EXPERIMENT SETUP: {coordinate} SWEEP")
+print(f" EXPERIMENT: Sweeping '{coordinate}' axis")
+print(f' Fixed Vars: r={r_val} mm, theta={theta_val} deg, z={z_val} mm')
 print(f" Frequency: {start_freq/1000:.1f} kHz -> {end_freq/1000:.1f} kHz")
 print(f" Steps:     {num_steps} points ({step_size/1000:.2f} kHz step)")
 print(f" Saving to: {output_file}")
@@ -57,11 +71,17 @@ with dwf.Device() as device:
 
     try:
         while True:
-            coord_val = input(f'\nEnter {coordinate} (mm) or [or "q"]: ').strip()
+            coord_val = input(f'\nEnter value for {coordinate} or (or "q"): ').strip()
 
             if coord_val.lower() == 'q':
                 print('Exiting...')
                 break
+
+            try:
+                current_coords[coordinate] = float(coord_val)
+            except ValueError:
+                print(f'Invalid number')
+                continue
 
             print(f'--> Starting frequency sweep for {coordinate} = {coord_val} mm...')
 
@@ -79,10 +99,12 @@ with dwf.Device() as device:
                 results = get_measurements(ch1, ch2, ch3, ch4, SAMPLE_RATE)
 
                 data = {
-                    f'{coordinate} Coordinate (mm)': coord_val,
-                    'Driving Frequency (Hz)': freq
+                    'r (mm)': current_coords['r'],
+                    'theta (deg)': current_coords['theta'],
+                    'z (mm)': current_coords['z'],
+                    'Driving Frequency (Hz)': freq,
+                    **results
                 }
-                data.update(results)
                 append_data(output_file, data)
 
                 tx_rms = results['TX Voltage RMS (V)']

@@ -1,0 +1,85 @@
+import dwfpy as dwf
+import matplotlib.pyplot as plt
+import pandas as pd
+from util.measurements import get_measurements
+
+FREQ = 117e3  # 117 kHz
+
+CH1_ATTEN = 10      # Power Supply Voltage
+CH2_ATTEN = 1/50e-3 # Current Probe 50 mV/A
+CH3_ATTEN = 500     # TX Coil Voltage
+CH4_ATTEN = 10      # RX Coil Voltage
+
+SAMPLE_RATE = 2e7 
+BUFFER_SIZE = 1000 
+
+with dwf.Device() as device:
+    print(f"Device {device.name} {device.serial_number} opened successfully.")
+    
+    scope = device.analog_input
+    scope[0].setup(range=5.0, offset=0.0) 
+    scope[1].setup(range=5.0, offset=0.0) 
+    scope[2].setup(range=5.0, offset=0.0) 
+    scope[3].setup(range=5.0, offset=0.0) 
+
+    scope.setup_edge_trigger(channel=0, mode='auto')
+    scope.setup_edge_trigger(channel=1, mode='auto')
+    scope.setup_edge_trigger(channel=2, mode='auto')
+    scope.setup_edge_trigger(channel=3, mode='auto')
+
+    input('Press Enter to start: ')
+    
+    pattern = device.digital_output
+    pattern[0].setup_clock(frequency=FREQ, configure=True, start=True)
+    device.digital_io[1].setup(enabled=True, state=True, configure=True)
+
+    # input('Press Enter to to change frequency to 116 kHz: ')
+    # pattern[0].setup_clock(frequency=116e3, configure=True, start=True)
+
+    input('Press Enter to gather data then stop: ')
+
+    scope.single(sample_rate=SAMPLE_RATE, buffer_size=BUFFER_SIZE, configure=True, start=True)
+    ch1 = scope[0].get_data() * CH1_ATTEN
+    ch2 = scope[1].get_data() * CH2_ATTEN
+    ch3 = scope[2].get_data() * CH3_ATTEN
+    ch4 = scope[3].get_data() * CH4_ATTEN
+
+    results = get_measurements(ch1, ch2, ch3, ch4, SAMPLE_RATE)
+
+    device.digital_io[0].output_state = False
+    device.digital_io[1].output_state = False
+    device.close()
+
+
+print("\n--- MEASUREMENT RESULTS ---")
+df = pd.DataFrame([results]).T 
+print(df)
+
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
+plt.suptitle(f"Scope Capture")
+t = [i / SAMPLE_RATE * 1e6 for i in range(len(ch1))]
+
+axes[0, 0].plot(t, ch1, color='tab:blue')
+axes[0, 0].set_ylabel('Ch1 Voltage (V)')
+axes[0, 0].set_title('Channel 1: Power Supply Voltage')
+axes[0, 0].grid(True)
+
+axes[0, 1].plot(t, ch2, color='tab:orange')
+axes[0, 1].set_ylabel('Ch2 Current (A)')
+axes[0, 1].set_title('Channel 2: TX Current')
+axes[0, 1].grid(True)
+
+axes[1, 0].plot(t, ch3, color='tab:green')
+axes[1, 0].set_ylabel('Ch3 Voltage (V)')
+axes[1, 0].set_title('Channel 3: TX Voltage')
+axes[1, 0].grid(True)
+
+axes[1, 1].plot(t, ch4, color='tab:purple')
+axes[1, 1].set_ylabel('Ch4 Voltage (V)')
+axes[1, 1].set_title('Channel 4: RX Voltage')
+axes[1, 1].set_xlabel('Time (microseconds)')
+axes[1, 1].grid(True)
+
+plt.tight_layout()
+plt.show()

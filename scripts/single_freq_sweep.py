@@ -9,9 +9,9 @@ from util.measurements import get_measurements
 from util.append_data import append_data
 
 parser = argparse.ArgumentParser(description="Perform a frequency sweep and log measurements.")
-parser.add_argument('-s', '--start', type=float, required=True, help='Start frequency in kHz.')
-parser.add_argument('-e', '--stop', type=float, required=True, help='End frequency in kHz.')
-parser.add_argument('-d', '--step', type=int, required=False, help='Step size in kHz.')
+parser.add_argument('-s', '--start', type=float, default=115.0, help='Start frequency in kHz.')
+parser.add_argument('-e', '--stop', type=float, default=120.0, help='End frequency in kHz.')
+parser.add_argument('-d', '--step', type=float, default=0.1, help='Step size in kHz.')
 parser.add_argument('-o', '--output', type=str, required=True, help='Output CSV file to append results.')
 
 args = parser.parse_args()
@@ -55,9 +55,9 @@ with dwf.Device() as device:
     pattern = device.digital_output
     device.digital_io[1].setup(enabled=True, state=True, configure=True)
 
-    pbar = tqdm(freq_list, desc='Sweeping', unit='Hz', ncols=100)
-
     input(f'Press Enter to start frequency sweep from {start_freq/1e3} kHz to {end_freq/1e3} kHz: ')
+
+    pbar = tqdm(freq_list, desc='Sweeping', unit='Hz', ncols=100)
 
     for freq in pbar:
         pattern[0].setup_clock(frequency=freq, configure=True, start=True)
@@ -88,8 +88,9 @@ with dwf.Device() as device:
 df = pd.read_csv(output_file, comment='#')
 plt.figure(figsize=(10, 6))
 plt.suptitle("Frequency Sweep Results")
-plt.plot(df['Driving Frequency (Hz)']*1e-3, df['TX Voltage RMS (V)'], '-o')
+# plt.plot(df['Driving Frequency (Hz)']*1e-3, df['TX Voltage RMS (V)'], '-o')
+plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Voltage Average (V)'], '-o')
 plt.xlabel('Driving Frequency (kHz)')
-plt.ylabel('TX Voltage RMS (V)')
+plt.ylabel('RX Voltage Average (V)')
 plt.grid()
 plt.show()

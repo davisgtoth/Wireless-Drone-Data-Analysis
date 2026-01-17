@@ -12,9 +12,9 @@ parser.add_argument('-c', '--sweep', type=str, required=True, choices=['r', 'the
 parser.add_argument('-r', type=float, default=0.0, help='Fixed r value (mm)')
 parser.add_argument('-t', '--theta', type=float, default=0.0, help='Fixed theta value (deg)')
 parser.add_argument('-z', type=float, default=0.0, help='Fixed z value (mm)')
-parser.add_argument('-s', '--start', type=float, required=True, help='Start frequency in kHz.')
-parser.add_argument('-e', '--stop', type=float, required=True, help='End frequency in kHz.')
-parser.add_argument('-d', '--step', type=int, required=False, help='Step size in kHz.')
+parser.add_argument('-s', '--start', type=float, default=115.0, help='Start frequency in kHz.')
+parser.add_argument('-e', '--stop', type=float, default=120.0, help='End frequency in kHz.')
+parser.add_argument('-d', '--step', type=float, default=0.1, help='Step size in kHz.')
 parser.add_argument('-o', '--output', type=str, required=True, help='Output CSV file to append results.')
 
 args = parser.parse_args()

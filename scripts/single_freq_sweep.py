@@ -28,12 +28,14 @@ CH4_ATTEN = 10      # RX Coil Voltage
 SAMPLE_RATE = 2e7 
 BUFFER_SIZE = 1000 
 
-freq_list = np.arange(start_freq, end_freq + step_size, step_size)
+# freq_list = np.arange(start_freq, end_freq + step_size, step_size)
+freq_list = np.arange(end_freq, start_freq - step_size, -step_size)  # Reverse order
 num_steps = len(freq_list)
 
 print("="*40)
 print(f" EXPERIMENT SETUP: SINGLE FREQUENCY SWEEP")
-print(f" Frequency: {start_freq/1000:.1f} kHz -> {end_freq/1000:.1f} kHz")
+# print(f" Frequency: {start_freq/1000:.1f} kHz -> {end_freq/1000:.1f} kHz")
+print(f" Frequency: {end_freq/1000:.1f} kHz -> {start_freq/1000:.1f} kHz")
 print(f" Steps:     {num_steps} points ({step_size/1000:.2f} kHz step)")
 print(f" Saving to: {output_file}")
 print("="*40)
@@ -55,7 +57,8 @@ with dwf.Device() as device:
     pattern = device.digital_output
     device.digital_io[1].setup(enabled=True, state=True, configure=True)
 
-    input(f'Press Enter to start frequency sweep from {start_freq/1e3} kHz to {end_freq/1e3} kHz: ')
+    # input(f'Press Enter to start frequency sweep from {start_freq/1e3} kHz to {end_freq/1e3} kHz: ')
+    input(f'Press Enter to start frequency sweep from {end_freq/1e3} kHz to {start_freq/1e3} kHz: ')
 
     pbar = tqdm(freq_list, desc='Sweeping', unit='Hz', ncols=100)
 

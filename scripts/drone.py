@@ -1,4 +1,5 @@
 import dwfpy as dwf
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from util.measurements import get_measurements
@@ -10,17 +11,23 @@ CH2_ATTEN = 1/50e-3 # Current Probe 50 mV/A
 CH3_ATTEN = 500     # TX Coil Voltage
 CH4_ATTEN = 10      # RX Coil Voltage
 
-SAMPLE_RATE = 2e7 
-BUFFER_SIZE = 1000 
+SCOPE_SAMPLE_RATE = 2e7 
+SCOPE_BUFFER_SIZE = 1000 
+
+FORCE_PIN = 3
+FORCE_FREQ = 5*1e3
+PIN_SAMPLE_RATE = 1e6
+NUM_PERIODS = 2
+PIN_BUFFER_SIZE = int(PIN_SAMPLE_RATE / FORCE_FREQ * NUM_PERIODS) 
 
 with dwf.Device() as device:
     print(f"Device {device.name} {device.serial_number} opened successfully.")
     
     scope = device.analog_input
-    scope[0].setup(range=5.0, offset=0.0) 
-    scope[1].setup(range=5.0, offset=0.0) 
-    scope[2].setup(range=5.0, offset=0.0) 
-    scope[3].setup(range=5.0, offset=0.0) 
+    scope[0].setup(range=10.0, offset=0.0) 
+    scope[1].setup(range=10.0, offset=0.0) 
+    scope[2].setup(range=10.0, offset=0.0) 
+    scope[3].setup(range=10.0, offset=0.0) 
 
     scope.setup_edge_trigger(channel=0, mode='auto')
     scope.setup_edge_trigger(channel=1, mode='auto')
@@ -33,18 +40,25 @@ with dwf.Device() as device:
     pattern[0].setup_clock(frequency=FREQ, configure=True, start=True)
     device.digital_io[1].setup(enabled=True, state=True, configure=True)
 
+    logic = device.digital_input
+    logic.setup_edge_trigger(channel=FORCE_PIN, edge='rising')
+
     # input('Press Enter to to change frequency to 116 kHz: ')
     # pattern[0].setup_clock(frequency=116e3, configure=True, start=True)
 
     input('Press Enter to gather data then stop: ')
 
-    scope.single(sample_rate=SAMPLE_RATE, buffer_size=BUFFER_SIZE, configure=True, start=True)
+    scope.single(sample_rate=SCOPE_SAMPLE_RATE, buffer_size=SCOPE_BUFFER_SIZE, configure=True, start=True)
     ch1 = scope[0].get_data() * CH1_ATTEN
     ch2 = scope[1].get_data() * CH2_ATTEN
     ch3 = scope[2].get_data() * CH3_ATTEN
     ch4 = scope[3].get_data() * CH4_ATTEN
 
-    results = get_measurements(ch1, ch2, ch3, ch4, SAMPLE_RATE)
+    logic.single(sample_rate=PIN_SAMPLE_RATE, buffer_size=PIN_BUFFER_SIZE, configure=True, start=True)
+    logic.read_status()
+    pin_data = logic.get_data()
+
+    results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE, pin_data, FORCE_PIN)
 
     device.digital_io[0].output_state = False
     device.digital_io[1].output_state = False
@@ -58,7 +72,7 @@ print(df)
 
 fig, axes = plt.subplots(2, 2, figsize=(10, 6), sharex=True)
 plt.suptitle(f"Scope Capture")
-t = [i / SAMPLE_RATE * 1e6 for i in range(len(ch1))]
+t = [i / SCOPE_SAMPLE_RATE * 1e6 for i in range(len(ch1))]
 
 axes[0, 0].plot(t, ch1, color='tab:blue')
 axes[0, 0].set_ylabel('Ch1 Voltage (V)')
@@ -82,4 +96,13 @@ axes[1, 1].set_xlabel('Time (microseconds)')
 axes[1, 1].grid(True)
 
 plt.tight_layout()
+plt.show()
+
+time_axis = np.linspace(0, PIN_BUFFER_SIZE/PIN_SAMPLE_RATE, len(pin_data))
+plt.figure(figsize=(10, 4))
+plt.step(time_axis * 1000, (pin_data >> FORCE_PIN) & 1, where='post')
+plt.title(f'Force Pin Signal - Duty Cycle: {results["RX Force (N)"]/9.81*1e3:.2f}')
+plt.xlabel('Time (milliseconds)')
+plt.ylabel('Digital Level')
+plt.grid(True)
 plt.show()

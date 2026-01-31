@@ -33,8 +33,9 @@ def get_measurements(ch1, ch2, ch3, ch4, sample_rate, pin_data=None, force_pin=N
     # Digital I/O - Force Measurement 
     if pin_data is not None:
         signal = (pin_data >> force_pin) & 1
-        duty_cycle = np.sum(signal) / len(signal) * 100
-        meas.update({'RX Force (N)': duty_cycle*10 * 1e-3 * 9.81})  # duty cyle * 10 = mass in grams
+        duty_cycle = np.sum(signal) / len(signal)
+        # print(f'Duty Cycle: {duty_cycle*100:.2f}%')
+        meas.update({'RX Force (mN)': duty_cycle*50 * 9.81})  # duty cyle * 50 = mass in grams
 
     return meas
 

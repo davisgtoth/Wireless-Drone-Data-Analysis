@@ -2,10 +2,11 @@ import dwfpy as dwf
 import numpy as np
 import matplotlib.pyplot as plt
 
-ESP32_FREQ = 5e3
+ESP32_FREQ = 1e3
 PIN_SAMPLE_RATE = 1e6
 NUM_PERIODS = 2
 PIN_BUFFER_SIZE = int(PIN_SAMPLE_RATE / ESP32_FREQ * NUM_PERIODS)
+# print(f'Pin Buffer Size: {PIN_BUFFER_SIZE}')
 
 with dwf.Device() as device:
     print(f"--> Connected to: {device.name} {device.serial_number}")
@@ -15,7 +16,7 @@ with dwf.Device() as device:
         frequency=ESP32_FREQ, 
         amplitude=1.65, 
         offset=1.65, 
-        symmetry=75,
+        symmetry=13,
         start=True
     )
 
@@ -26,42 +27,47 @@ with dwf.Device() as device:
     input("Press Enter to continue...")
 
     # scope = device.analog_input
-    # scope[0].setup(range=10.0, offset=0.0)
-    # scope.setup_edge_trigger(channel=0, mode='auto')
+    # scope[3].setup(range=10.0, offset=0.0)
+    # scope.setup_edge_trigger(channel=3, mode='auto')
     # scope.single(sample_rate=1e6, buffer_size=4096, configure=True, start=True)
-    # ch1 = scope[0].get_data()
+    # ch4 = scope[3].get_data()
 
     logic = device.digital_input
-    logic.setup_edge_trigger(channel=3, edge='rising')
+    logic.setup_edge_trigger(channel=2, edge='rising')
+    # logic.setup_edge_trigger(channel=2, edge='falling')
     sample = logic.single(
         sample_rate=PIN_SAMPLE_RATE,
         buffer_size=PIN_BUFFER_SIZE,
+        # sample_rate=1e6,
+        # buffer_size=4096,
         configure=True,
         start=True
     )
-    logic.read_status()
+    # print(logic.read_status())
+    # logic.read_status()
     raw_data = logic.get_data()
+    print(raw_data)
     # pin0 = (raw_data >> 0) & 1
     # pin1 = (raw_data >> 1) & 1
-    pin3 = (raw_data >> 3) & 1
-    # print(len(pin_data))
+    pin2 = (raw_data >> 2) & 1
+    print(len(pin2))
 
     device.digital_io[0].output_state = False
     device.digital_io[1].output_state = False
     device.close()
 
-duty_cycle = np.sum(pin3) / len(pin3) * 100
-time_axis = np.linspace(0, PIN_BUFFER_SIZE/PIN_SAMPLE_RATE, len(pin3))
+duty_cycle = np.sum(pin2) / len(pin2) * 100
+time_axis = np.linspace(0, PIN_BUFFER_SIZE/PIN_SAMPLE_RATE, len(pin2))
 plt.figure(figsize=(10, 6))
 # plt.step(time_axis * 1000, pin0, where='post', label='Pin 0')
 # plt.step(time_axis * 1000, pin1, where='post', label='Pin 1')
-plt.step(time_axis * 1000, pin3, where='post', label='Pin 3')
+plt.step(time_axis * 1000, pin2, where='post', label='Pin 2')
 plt.title(f'Duty Cycle: {duty_cycle:.2f}%')
 plt.grid(True)
-plt.legend()
+# plt.legend()
 plt.show()
 
-# t = [i / 1e6 for i in range(len(ch1))]
+# t = [i / 1e6 for i in range(len(ch4))]
 # plt.figure(figsize=(10, 6))
-# plt.plot(t, ch1, label='Channel 1')
+# plt.plot(t, ch4, label='Channel 4')
 # plt.show()

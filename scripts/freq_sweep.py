@@ -36,8 +36,8 @@ CH4_ATTEN = 10      # RX Coil Voltage
 SCOPE_SAMPLE_RATE = 2e7 
 SCOPE_BUFFER_SIZE = 2000 
 
-FORCE_PIN = 3
-FORCE_FREQ = 5*1e3
+FORCE_PIN = 2
+FORCE_FREQ = 1e3
 PIN_SAMPLE_RATE = 1e6
 NUM_PERIODS = 2
 PIN_BUFFER_SIZE = int(PIN_SAMPLE_RATE / FORCE_FREQ * NUM_PERIODS) 
@@ -95,11 +95,14 @@ with dwf.Device() as device:
 
             print(f'--> Starting frequency sweep for {coordinate} = {coord_val} mm...')
 
-            pbar = tqdm(freq_list, desc='Sweeping', unit='Hz', ncols=100)
+            pbar = tqdm(freq_list, desc='Sweeping', unit='kHz', ncols=100)
+
+            pattern[0].setup_clock(frequency=freq_list[0], configure=True, start=True)
+            time.sleep(1)
 
             for freq in pbar:
                 pattern[0].setup_clock(frequency=freq, configure=True, start=True)
-                time.sleep(0.05)
+                time.sleep(1)
 
                 scope.single(sample_rate=SCOPE_SAMPLE_RATE, buffer_size=SCOPE_BUFFER_SIZE, configure=True, start=True)
                 ch1 = scope[0].get_data() * CH1_ATTEN
@@ -109,7 +112,6 @@ with dwf.Device() as device:
 
                 if args.force:
                     logic.single(sample_rate=PIN_SAMPLE_RATE, buffer_size=PIN_BUFFER_SIZE, configure=True, start=True)
-                    logic.read_status()
                     pin_data = logic.get_data()
                 else:
                     pin_data = None

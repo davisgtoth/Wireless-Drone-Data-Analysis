@@ -63,6 +63,8 @@ with dwf.Device() as device:
     logic = device.digital_input
     logic.setup_edge_trigger(channel=FORCE_PIN, edge='rising')
 
+    time.sleep(1) 
+
     start_time = time.time()
     timeout = start_time + t_sec
 
@@ -107,15 +109,16 @@ with dwf.Device() as device:
             step_freq = 0.1e3
             freq_list = np.arange(start_freq, stop_freq + step_freq, step_freq)
 
-            pattern[0].setup_clock(frequency=freq_list[0], configure=True, start=True)
-            time.sleep(1)
+            # pattern[0].setup_clock(frequency=freq_list[0], configure=True, start=True)
+            # time.sleep(1)
 
             pbar = tqdm(freq_list, desc='Sweeping', unit='kHz', ncols=100)
             freq_start_delT = time.time() - start_time
 
             for freq in pbar:
                 pattern[0].setup_clock(frequency=freq, configure=True, start=True)
-                time.sleep(2)
+                # time.sleep(2)
+                time.sleep(0.05)
 
                 scope.single(sample_rate=SCOPE_SAMPLE_RATE, buffer_size=SCOPE_BUFFER_SIZE, configure=True, start=True)
                 ch1 = scope[0].get_data() * CH1_ATTEN
@@ -123,10 +126,11 @@ with dwf.Device() as device:
                 ch3 = scope[2].get_data() * CH3_ATTEN
                 ch4 = scope[3].get_data() * CH4_ATTEN
 
-                logic.single(sample_rate=PIN_SAMPLE_RATE, buffer_size=PIN_BUFFER_SIZE, configure=True, start=True)
-                pin_data = logic.get_data()
+                # logic.single(sample_rate=PIN_SAMPLE_RATE, buffer_size=PIN_BUFFER_SIZE, configure=True, start=True)
+                # pin_data = logic.get_data()
 
-                results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE, pin_data, FORCE_PIN)
+                # results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE, pin_data, FORCE_PIN)
+                results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE)
                 data = {
                     'Start Time (s)': freq_start_delT,
                     'Driving Frequency (Hz)': freq,
@@ -134,8 +138,10 @@ with dwf.Device() as device:
                 }
                 append_data(output_file, data)
 
-                force = results['RX Force (mN)']
-                pbar.set_postfix(f'Freq={freq/1e3:.1f}kHz | Force={force:.2f}mN')
+                # force = results['RX Force (mN)']
+                # pbar.set_postfix(f'Freq={freq/1e3:.1f}kHz')
+                tx_rms = results['TX Voltage RMS (V)']
+                pbar.set_postfix_str(f'Freq={freq/1e3:.1f}k | TX_RMS={tx_rms:.2f}V')
 
 
         if not args.sweep:
@@ -144,7 +150,10 @@ with dwf.Device() as device:
             force_g = force_mn / 9.81
             print(f'[{timestamp}] Force: {force_mn:6.2f} mN ({force_g:5.1f}g)')
 
-        time.sleep(5)
+        # time.sleep(15)
+        pattern[0].setup_clock(frequency=FREQ, configure=True, start=True)
+        # time.sleep(5)
+        time.sleep(30)
 
     print(f"\n--> Measurement complete. Results saved to {output_file}")
 

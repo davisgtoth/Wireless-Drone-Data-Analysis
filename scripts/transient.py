@@ -104,8 +104,10 @@ with dwf.Device() as device:
 
 
         elif args.sweep:
-            start_freq = 115e3
-            stop_freq = 120e3
+            # start_freq = 115e3
+            # stop_freq = 120e3
+            start_freq = 118e3
+            stop_freq = 123e3
             step_freq = 0.1e3
             freq_list = np.arange(start_freq, stop_freq + step_freq, step_freq)
 

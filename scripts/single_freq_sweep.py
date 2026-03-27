@@ -84,9 +84,9 @@ with dwf.Device() as device:
 
     for freq in pbar:
         pattern[0].setup_clock(frequency=freq, configure=True, start=True)
-        # time.sleep(0.5)
+        time.sleep(0.5)
         # time.sleep(0.75)
-        time.sleep(1)
+        # time.sleep(1)
 
         scope.single(sample_rate=SCOPE_SAMPLE_RATE, buffer_size=SCOPE_BUFFER_SIZE, configure=True, start=True)
         ch1 = scope[0].get_data() * CH1_ATTEN
@@ -121,9 +121,10 @@ df = pd.read_csv(output_file, comment='#')
 plt.figure(figsize=(10, 6))
 plt.suptitle("Frequency Sweep Results")
 # plt.plot(df['Driving Frequency (Hz)']*1e-3, df['TX Voltage RMS (V)'], '-o')
-# plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Voltage Average (V)'], '-o')
-plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Force (mN)'], '-o')
+plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Voltage Average (V)'], '-o')
+# plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Force (mN)'], '-o')
 plt.xlabel('Driving Frequency (kHz)')
-plt.ylabel('RX Force (mN)')
+plt.ylabel('TX Voltage RMS (V)')
+# plt.ylabel('RX Force (mN)')
 plt.grid()
 plt.show()

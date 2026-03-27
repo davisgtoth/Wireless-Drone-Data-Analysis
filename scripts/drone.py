@@ -6,7 +6,10 @@ from util.measurements import get_measurements
 
 # FREQ = 117e3  # 117 kHz
 # FREQ = 118e3  # 118 kHz
-FREQ = 119e3  # 119 kHz
+# FREQ = 119e3  # 119 kHz
+# FREQ = 120.6e3  # 120.5 kHz
+# FREQ = 158e3  # 158 kHz
+FREQ = 130e3  # 130 kHz
 
 CH1_ATTEN = 10      # Power Supply Voltage
 CH2_ATTEN = 1/50e-3 # Current Probe 50 mV/A
@@ -99,11 +102,11 @@ axes[1, 1].grid(True)
 plt.tight_layout()
 plt.show()
 
-t_force = np.linspace(0, PIN_BUFFER_SIZE/PIN_SAMPLE_RATE, len(pin_data))
-plt.figure(figsize=(10, 4))
-plt.step(t_force * 1000, (pin_data >> FORCE_PIN) & 1, where='post')
-plt.title(f'Force Pin Signal - Mass in Grams: {results["RX Force (mN)"]/9.81:.2f} g')
-plt.xlabel('Time (milliseconds)')
-plt.ylabel('Digital Level')
-plt.grid(True)
-plt.show()
+# t_force = np.linspace(0, PIN_BUFFER_SIZE/PIN_SAMPLE_RATE, len(pin_data))
+# plt.figure(figsize=(10, 4))
+# plt.step(t_force * 1000, (pin_data >> FORCE_PIN) & 1, where='post')
+# plt.title(f'Force Pin Signal - Mass in Grams: {results["RX Force (mN)"]/9.81:.2f} g')
+# plt.xlabel('Time (milliseconds)')
+# plt.ylabel('Digital Level')
+# plt.grid(True)
+# plt.show()

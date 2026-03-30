@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from util.measurements import get_measurements
 
+FREQ = 114e3  # 115 kHz
 # FREQ = 117e3  # 117 kHz
 # FREQ = 118e3  # 118 kHz
 # FREQ = 119e3  # 119 kHz
+# FREQ = 120e3  # 120 kHz
 # FREQ = 120.6e3  # 120.5 kHz
 # FREQ = 158e3  # 158 kHz
-FREQ = 130e3  # 130 kHz
+# FREQ = 130e3  # 130 kHz
 
 CH1_ATTEN = 10      # Power Supply Voltage
 CH2_ATTEN = 1/50e-3 # Current Probe 50 mV/A

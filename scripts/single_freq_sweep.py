@@ -84,7 +84,7 @@ with dwf.Device() as device:
 
     for freq in pbar:
         pattern[0].setup_clock(frequency=freq, configure=True, start=True)
-        time.sleep(0.5)
+        time.sleep(0.05)
         # time.sleep(0.75)
         # time.sleep(1)
 
@@ -120,8 +120,8 @@ with dwf.Device() as device:
 df = pd.read_csv(output_file, comment='#')
 plt.figure(figsize=(10, 6))
 plt.suptitle("Frequency Sweep Results")
-# plt.plot(df['Driving Frequency (Hz)']*1e-3, df['TX Voltage RMS (V)'], '-o')
-plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Voltage Average (V)'], '-o')
+plt.plot(df['Driving Frequency (Hz)']*1e-3, df['TX Voltage RMS (V)'], '-o')
+# plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Voltage Average (V)'], '-o')
 # plt.plot(df['Driving Frequency (Hz)']*1e-3, df['RX Force (mN)'], '-o')
 plt.xlabel('Driving Frequency (kHz)')
 plt.ylabel('TX Voltage RMS (V)')

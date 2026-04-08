@@ -165,7 +165,7 @@ def run_optimization(hardware_params, target_params):
             args=(Bx_matrix_eval, Bz_matrix_eval, max_turns, angle_deg, V_target_eval),
             integrality=integrality,
             strategy='best1bin',
-            maxiter=1000,      
+            maxiter=10000,      
             popsize=5,         
             mutation=(0.5, 1.0),
             recombination=0.7,

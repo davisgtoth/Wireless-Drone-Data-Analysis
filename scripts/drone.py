@@ -1,17 +1,22 @@
+import argparse
 import dwfpy as dwf
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from util.measurements import get_measurements
 
-FREQ = 114e3  # 115 kHz
-# FREQ = 117e3  # 117 kHz
-# FREQ = 118e3  # 118 kHz
-# FREQ = 119e3  # 119 kHz
-# FREQ = 120e3  # 120 kHz
-# FREQ = 120.6e3  # 120.5 kHz
-# FREQ = 158e3  # 158 kHz
-# FREQ = 130e3  # 130 kHz
+parser = argparse.ArgumentParser(description="Run the measurement script at a specific frequency.")
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('-f', '--flight', action='store_true', help='Operate at flight frequency (115 kHz)')
+group.add_argument('-s', '--stable', action='store_true', help='Operate at stable frequency (119 kHz)')
+
+args = parser.parse_args()
+if args.flight:
+    FREQ = 115e3
+    print("Mode: Flight (115 kHz)")
+elif args.stable:
+    FREQ = 119e3
+    print("Mode: Stable (119 kHz)")
 
 CH1_ATTEN = 10      # Power Supply Voltage
 CH2_ATTEN = 1/50e-3 # Current Probe 50 mV/A
@@ -61,10 +66,11 @@ with dwf.Device() as device:
     ch3 = scope[2].get_data() * CH3_ATTEN
     ch4 = scope[3].get_data() * CH4_ATTEN
 
-    logic.single(sample_rate=PIN_SAMPLE_RATE, buffer_size=PIN_BUFFER_SIZE, configure=True, start=True)
-    pin_data = logic.get_data()
+    # logic.single(sample_rate=PIN_SAMPLE_RATE, buffer_size=PIN_BUFFER_SIZE, configure=True, start=True)
+    # pin_data = logic.get_data()
 
-    results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE, pin_data, FORCE_PIN)
+    # results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE, pin_data, FORCE_PIN)
+    results = get_measurements(ch1, ch2, ch3, ch4, SCOPE_SAMPLE_RATE)
 
     device.digital_io[0].output_state = False
     device.digital_io[1].output_state = False

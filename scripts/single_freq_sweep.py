@@ -42,6 +42,11 @@ else:
     freq_list = np.arange(end_freq, start_freq - step_size, -step_size)  # Reverse order
 num_steps = len(freq_list)
 
+if args.force:
+    sleep_time = 1.0
+else:
+    sleep_time = 0.05
+
 print("="*40)
 print(f" EXPERIMENT SETUP: SINGLE FREQUENCY SWEEP")
 if not args.reverse:
@@ -84,9 +89,7 @@ with dwf.Device() as device:
 
     for freq in pbar:
         pattern[0].setup_clock(frequency=freq, configure=True, start=True)
-        time.sleep(0.05)
-        # time.sleep(0.75)
-        # time.sleep(1)
+        time.sleep(sleep_time)
 
         scope.single(sample_rate=SCOPE_SAMPLE_RATE, buffer_size=SCOPE_BUFFER_SIZE, configure=True, start=True)
         ch1 = scope[0].get_data() * CH1_ATTEN
